@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spotify Playlist Analyzer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+</head>
+<body>
+    <div class="container">
+        <h1>Spotify Playlist Analyzer</h1>
+
+        <form method="post">
+            <label for="playlist_uri">Enter Spotify Playlist URI:</label>
+            <input type="text" name="playlist_uri" id="playlist_uri" placeholder="e.g., spotify:playlist:37i9dQZF1DXcBWIGoYBM5M" required>
+            <button type="submit">Analyze Playlist</button>
+        </form>
+
+        {% if error_message %}
+            <p class="error">{{ error_message }}</p>
+        {% endif %}
+
+        {% if playlist_info or top_genres or top_artists or top_tracks %}
+        <div class="results-grid"> {% if playlist_info %}
+            <div class="playlist-info">
+                <h2>{{ playlist_info.name }}</h2>
+                {% if playlist_info.image_url %}
+                    <img src="{{ playlist_info.image_url }}" alt="Cover art for {{ playlist_info.name }}" class="playlist-cover">
+                {% endif %}
+                <p><strong>Description:</strong> {{ playlist_info.description | default('No description available.', true) }}</p>
+                <p><strong>Owner:</strong> {{ playlist_info.owner }}</p>
+                <p><strong>Total Tracks:</strong> {{ playlist_info.total_tracks }}</p>
+            </div>
+            {% endif %}
+
+            {% if top_genres %}
+            <div class="genres-info">
+                <h2>Top Genres:</h2>
+                <ul>
+                {% for genre, count in top_genres %}
+                    <li class="genre-info">
+                            <div>
+                                <strong>{{ genre | title }}</strong>
+                            </div>
+                            <span>{{ count }} track{{ 's' if count > 1 else '' }}</span>
+                    </li>
+                {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            {% if top_artists %}
+            <div class="artists-info">
+                <h2>Top 5 Artists:</h2>
+                <ul>
+                {% for artist, count in top_artists %}
+                    <li class="artist-info">
+                            <div>
+                                <strong>{{ artist }}</strong>
+                            </div>
+                            <span>{{ count }} track{{ 's' if count > 1 else '' }}</span>
+                    </li>
+                {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            {% if top_tracks %}
+                <div class="track-list">
+                    <h2>Top 5 Tracks:</h2>
+                    <ul>
+                    {% for track in top_tracks %}
+                        <li class="track-info">
+                            <div>
+                                <strong>{{ track.name }}</strong> by {{ track.artists | map(attribute='name') | join(', ') }}
+                            </div>
+                            <span class="track-popularity">Popularity: {{ track.popularity }}</span>
+                        </li>
+                    {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+        </div> {% else %}
+            <p class="initial-message">Enter a Spotify playlist URI above to get insights into its top genres, artists, and tracks!</p>
+        {% endif %}
+    </div>
+</body>
+</html>
